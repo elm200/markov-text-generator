@@ -62,20 +62,24 @@ def create_triplets(text):
     return flatten_list(triplets)
 
 
-def save_as_pickle(path, obj):
+def save_to_pickle(path, obj):
     with open(path, 'wb') as f:
         pickle.dump(obj, f)
+
+
+def load_from_pickle(path):
+    with open(path, 'rb') as f:
+        return pickle.load(f)
 
 
 def load_or_create_triplets():
     path = 'triplets.pkl'
     if os.path.isfile(path):
-        with open(path, 'rb') as f:
-            return pickle.load(f)
+        return load_from_pickle(path)
     else:
         text = read_tweets()
         triplets = create_triplets(text)
-        save_as_pickle('triplets.pkl', triplets)
+        save_to_pickle(path, triplets)
         return triplets
 
 

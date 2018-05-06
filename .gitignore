@@ -99,3 +99,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# applicaton specific
+tweets.csv
+triplets.pkl
