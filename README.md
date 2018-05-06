@@ -21,3 +21,11 @@ Twitterの公式サイトから、自分のツイートをダウンロードし�
 ```
 $ python text_generator.py
 ```
+
+## 参考
+
+- https://github.com/o-tomox/TextGenerator
+
+アルゴリズムについてはこのコードに基づいている。
+コードの一部については、そのまま利用している部分がある。
+ただし、全体の構成は私が大幅に変更した。
