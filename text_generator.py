@@ -1,0 +1,115 @@
+import os
+import pandas as pd
+import re
+import pickle
+import random
+import MeCab
+
+
+tagger = MeCab.Tagger('-Ochasen')
+
+
+def read_tweets():
+    df = pd.read_csv('tweets.csv')
+    tweets = df['text']
+    return "。".join(tweets)
+
+
+def normalize_text(text):
+    blacklist = '[ @0-9a-zA-Z\|/:%\$&?\(\)~\.=\+\-_「」（）／　：・”“]+'
+    return re.sub(blacklist, '', text)
+
+
+def to_sentences(text):
+    delimiter = "。|．|\."
+    return re.split(delimiter, text)
+
+
+def to_morphemes(sentence):
+    assert isinstance(sentence, str)
+    ms = ['__B__']
+    node = tagger.parseToNode(sentence)
+    while node:
+        m = node.surface
+        if len(m) > 0:
+            ms.append(m)
+        node = node.next
+    ms.append('__E__')
+    return ms
+
+
+def to_triplets(morphemes):
+    triplets = []
+    if len(morphemes) >= 3:
+        for i in range(len(morphemes)-2):
+            triplet = tuple(morphemes[i:i+3])
+            triplets.append(triplet)
+    return triplets
+
+
+def flatten_list(ls):
+    res = []
+    for item in ls:
+        res.extend(item)
+    return res
+
+
+def create_triplets(text):
+    text = normalize_text(text)
+    sentences = to_sentences(text)
+    triplets = [to_triplets(to_morphemes(sentence))
+                for sentence in sentences]
+    return flatten_list(triplets)
+
+
+def save_as_pickle(path, obj):
+    with open(path, 'wb') as f:
+        pickle.dump(obj, f)
+
+
+def load_or_create_triplets():
+    path = 'triplets.pkl'
+    if os.path.isfile(path):
+        with open(path, 'rb') as f:
+            return pickle.load(f)
+    else:
+        text = read_tweets()
+        triplets = create_triplets(text)
+        save_as_pickle('triplets.pkl', triplets)
+        return triplets
+
+
+def matched_triplets(triplets, cond):
+    l = len(cond)
+    return [triplet for triplet in triplets if triplet[:l] == cond[:l]]
+
+
+def random_triplet(triplets, cond):
+    matched = matched_triplets(triplets, cond)
+    return random.choice(matched)
+
+
+def create_sentence(triplets):
+    ms = []
+    triplet = random_triplet(triplets, ('__B__',))
+    ms.append(triplet[1])
+    while True:
+        triplet = random_triplet(triplets, triplet[1:3])
+        ms.append(triplet[1])
+        if triplet[2] == '__E__':
+            break
+    return ''.join(ms) + '。'
+
+
+def main():
+    triplets = load_or_create_triplets()
+    n = 20
+    for i in range(n):
+        try:
+            print(create_sentence(triplets))
+        except:
+            pass
+
+
+if __name__ == '__main__':
+    main()
