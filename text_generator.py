@@ -97,11 +97,9 @@ def create_sentence(triplets):
     ms = []
     triplet = random_triplet(triplets, ('__B__',))
     ms.append(triplet[1])
-    while True:
+    while triplet[2] != '__E__':
         triplet = random_triplet(triplets, triplet[1:3])
         ms.append(triplet[1])
-        if triplet[2] == '__E__':
-            break
     return ''.join(ms) + '。'
 
 
